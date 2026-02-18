@@ -1,0 +1,62 @@
+{
+    "generator-water": {
+			"hasSonarqubeIntegration": true,
+			"hasAuthentication": true,
+			"featuresModules": [
+						"group: 'it.water.user', name:'User-integration', version:project.waterVersion",
+						"group: 'it.water.role', name:'Role-integration', version:project.waterVersion",
+						"group: 'it.water.permission', name:'Permission-service', version:project.waterVersion"
+			],
+			"applicationTypeEntity": false,
+			"applicationType": "service",
+			"projectSuffix": "jobScheduler",
+			"projectSuffixUpperCase": "JobScheduler",
+			"projectSuffixLowerCase": "jobscheduler",
+			"projectName": "JobScheduler",
+			"projectGroupId": "it.water.connectors.jobscheduler",
+			"projectVersion": "project.waterVersion",
+			"projectTechnology": "water",
+			"hasRestServices": true,
+			"restContextRoot": "/jobSchedulers",
+			"hasModel": true,
+			"modelName": "JobScheduler",
+			"modelNameLowerCase": "jobScheduler",
+			"isProtectedEntity": false,
+			"isOwnedEntity": false,
+			"persistenceLib": "jakarta",
+			"validationLib": "jakarta",
+			"projectPath": "JobScheduler",
+			"projectApiPath": "JobScheduler/JobScheduler-api",
+			"projectModelPath": "JobScheduler/JobScheduler-model",
+			"projectServicePath": "JobScheduler/JobScheduler-service",
+			"projectParentPath": "JobScheduler",
+			"projectBasePath": "/src/main/java/it/water/connectors/jobscheduler",
+			"projectTestPath": "/src/test/java/it/water/connectors/jobscheduler",
+			"apiPackagePath": "/src/main/java/it/water/connectors/jobscheduler/api",
+			"apiPackage": "it.water.connectors.jobscheduler.api",
+			"actionsPackagePath": "/src/main/java/it/water/connectors/jobscheduler/actions",
+			"actionsPackage": "it.water.connectors.jobscheduler.actions",
+			"modelPackagePath": "/src/main/java/it/water/connectors/jobscheduler/model",
+			"modelPackage": "it.water.connectors.jobscheduler.model",
+			"repositoryPackagePath": "/src/main/java/it/water/connectors/jobscheduler/repository",
+			"repositoryPackage": "it.water.connectors.jobscheduler.repository",
+			"springRepository": true,
+			"servicePackagePath": "/src/main/java/it/water/connectors/jobscheduler/service",
+			"servicePackage": "it.water.connectors.jobscheduler.service",
+			"serviceRestPackagePath": "/src/main/java/it/water/connectors/jobscheduler/service/rest",
+			"serviceRestPackage": "it.water.connectors.jobscheduler.service.rest",
+			"testPackage": "it.water.connectors.jobscheduler",
+			"publishModule": true,
+			"publishRepoName": "public-water-repository",
+			"publishRepoUrl": "https://nexus.acsoftware.it/nexus/repository/maven-water/",
+			"publishRepoHasCredentials": true,
+			"entities": [
+						{
+									"modelName": "JobScheduler",
+									"isProtectedEntity": false,
+									"isOwnedEntity": false
+						}
+			],
+			"parent-project": true
+}
+}

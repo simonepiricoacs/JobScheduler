@@ -1,0 +1,90 @@
+plugins {
+    id("org.sonarqube") version "5.1.0.4882"
+}
+
+allprojects {
+    project.ext.publishRepoName = "public-water-repository"
+    project.ext.publishRepoUrl =  "https://nexus.acsoftware.it/nexus/repository/maven-water/"
+	project.ext.publishRepoUsername =  System.getProperty("publishRepoUsername","noUser")
+    project.ext.publishRepoPassword =  System.getProperty("publishRepoPassword","noPassword")
+    project.ext.quartzVersion = "2.3.2"
+    project.ext.apacheCuratorVersion = "5.8.0"
+
+    project.ext.JobSchedulerVersion = project.waterVersion
+    group 'it.water.connectors.jobscheduler'
+	version project.JobSchedulerVersion
+    repositories{
+      mavenLocal()
+	  mavenCentral()
+      maven {
+         url "https://plugins.gradle.org/m2/"
+      }
+      maven {
+            url project.acsMavenRepository
+      }
+	}
+	
+	apply plugin: 'java'
+	apply plugin: 'maven-publish'
+	apply plugin: 'jacoco'
+	
+	publishing {
+		repositories {
+			maven {
+								credentials {
+					username project.publishRepoUsername
+					password project.publishRepoPassword
+				}
+								name = project.publishRepoName
+				url = project.publishRepoUrl
+			}
+		}
+	}
+ 
+  test {
+        finalizedBy jacocoTestReport
+    }
+ }
+
+sonarqube {
+    properties {
+        // Configurazione globale del progetto Sonar
+        property "sonar.projectKey", "water.JobScheduler"
+        property "sonar.projectName", "water.JobScheduler"
+        property "sonar.projectVersion", project.waterVersion
+
+        // Includes all folder and sources for submodules
+        property "sonar.sources", fileTree(dir: '.', include: '**/src/main/java').asPath
+        property "sonar.tests", fileTree(dir: '.', include: '**/src/test/java').asPath
+        property "sonar.java.binaries", fileTree(dir: '.', include: '**/build/classes').asPath
+        property "sonar.test.exclusions", fileTree(dir: '.', include: '**/src/test/java')
+
+        // Global path for jacoco report
+        property "sonar.coverage.jacoco.xmlReportPaths", file("${buildDir}/reports/jacoco/jacocoRootReport.xml")
+
+        property "sonar.host.url", System.getProperty("sonar.host.url", "default")
+        property "sonar.login", System.getProperty("sonar.login", "default")
+    }
+}
+
+task jacocoRootReport(type: JacocoReport) {
+    dependsOn subprojects.collect { it.tasks.named("test") }
+    dependsOn subprojects.collect { it.tasks.named("jacocoTestReport") }
+
+    additionalSourceDirs.setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
+    classDirectories.setFrom(files(subprojects.collect { p ->
+        fileTree(dir: "${p.buildDir}/classes/java/main")
+    }))
+    executionData.setFrom(files(subprojects.collect { p ->
+        fileTree(dir: p.buildDir, include: "jacoco/*.exec")
+    }))
+
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+        xml.outputLocation = file("${buildDir}/reports/jacoco/jacocoRootReport.xml")
+        html.outputLocation = file("${buildDir}/reports/jacoco/jacocoRootReport.html")
+    }
+}
+
