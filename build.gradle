@@ -68,23 +68,20 @@ sonarqube {
 }
 
 task jacocoRootReport(type: JacocoReport) {
-    dependsOn subprojects.collect { it.tasks.named("test") }
-    dependsOn subprojects.collect { it.tasks.named("jacocoTestReport") }
-
+    dependsOn subprojects.test
     additionalSourceDirs.setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
-    classDirectories.setFrom(files(subprojects.collect { p ->
-        fileTree(dir: "${p.buildDir}/classes/java/main")
-    }))
-    executionData.setFrom(files(subprojects.collect { p ->
-        fileTree(dir: p.buildDir, include: "jacoco/*.exec")
-    }))
-
+    classDirectories.setFrom(
+            files(subprojects.collect { project ->
+                fileTree(dir: "${project.buildDir}/classes/java/main").exclude("**/src/test/java/**")
+            })
+    )
+    executionData.setFrom(fileTree(project.rootDir.absolutePath).include("**/build/jacoco/test.exec"))
     reports {
         xml.required = true
         html.required = true
         csv.required = false
-        xml.outputLocation = file("${buildDir}/reports/jacoco/jacocoRootReport.xml")
-        html.outputLocation = file("${buildDir}/reports/jacoco/jacocoRootReport.html")
+        xml.destination file("${buildDir}/reports/jacoco/jacocoRootReport.xml")
+        html.destination file("${buildDir}/reports/jacoco/jacocoRootReport.html")
     }
 }
 
