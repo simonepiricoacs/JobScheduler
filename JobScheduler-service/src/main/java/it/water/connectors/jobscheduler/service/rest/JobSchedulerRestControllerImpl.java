@@ -1,16 +1,11 @@
 
 package it.water.connectors.jobscheduler.service.rest;
 
-import it.water.connectors.jobscheduler.api.*;
-import it.water.connectors.jobscheduler.api.rest.*;
-import it.water.connectors.jobscheduler.model.*;
-
+import it.water.connectors.jobscheduler.api.JobSchedulerApi;
+import it.water.connectors.jobscheduler.api.rest.JobSchedulerRestApi;
 import it.water.core.api.service.rest.FrameworkRestController;
-import it.water.core.interceptors.annotations.*;
-
-
-import lombok.*;
-
+import it.water.core.interceptors.annotations.Inject;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

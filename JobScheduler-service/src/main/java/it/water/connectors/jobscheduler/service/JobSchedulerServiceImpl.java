@@ -1,12 +1,13 @@
 package it.water.connectors.jobscheduler.service;
 
-import it.water.connectors.jobscheduler.api.*;
-import it.water.connectors.jobscheduler.model.*;
-import it.water.core.api.permission.SecurityContext;
+import it.water.connectors.jobscheduler.api.JobSchedulerApi;
+import it.water.connectors.jobscheduler.api.JobSchedulerSystemApi;
 import it.water.core.api.registry.ComponentRegistry;
-import it.water.core.interceptors.annotations.*;
+import it.water.core.interceptors.annotations.FrameworkComponent;
+import it.water.core.interceptors.annotations.Inject;
 import it.water.core.service.BaseServiceImpl;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 
 /**

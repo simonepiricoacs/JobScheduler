@@ -10,6 +10,7 @@ import it.water.core.api.interceptors.OnActivate;
 import it.water.core.api.interceptors.OnDeactivate;
 import it.water.core.interceptors.annotations.FrameworkComponent;
 import it.water.core.interceptors.annotations.Inject;
+import it.water.core.model.exceptions.WaterRuntimeException;
 import it.water.core.service.BaseSystemServiceImpl;
 import lombok.Setter;
 import org.apache.curator.framework.recipes.leader.LeaderLatchListener;
@@ -18,7 +19,7 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Properties;
 
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -84,7 +85,7 @@ public class JobSchedulerSystemServiceImpl extends BaseSystemServiceImpl impleme
         if (jobDetail == null) {
             String errorMsg = "Could not add job: jobDetail was null";
             getLog().error(errorMsg);
-            throw new RuntimeException(errorMsg);
+            throw new WaterRuntimeException(errorMsg);
         }
         JobKey jobKey = jobDetail.getKey();
         getLog().info("Adding job {} to scheduler", jobKey);
@@ -97,8 +98,9 @@ public class JobSchedulerSystemServiceImpl extends BaseSystemServiceImpl impleme
             } else
                 getLog().warn("Job {} already exists, it has not been added", jobKey);
         } catch (ParseException | SchedulerException e) {
-            getLog().error("Could not schedule job {}: {}", new Object[]{jobKey, e.getMessage()});
-            throw new RuntimeException(e);
+            //getLog().error("Could not schedule job {}: {}", jobKey, e.getMessage());
+            String errorMessage = String.format("Could not schedule job %s: %s", jobKey, e.getMessage());
+            throw new WaterRuntimeException(errorMessage,e);
         }
     }
 
@@ -108,7 +110,7 @@ public class JobSchedulerSystemServiceImpl extends BaseSystemServiceImpl impleme
         if (jobKey == null) {
             String errorMsg = "Could not delete job: jobKey was null";
             getLog().error(errorMsg);
-            throw new RuntimeException(errorMsg);
+            throw new WaterRuntimeException(errorMsg);
         }
         getLog().info("Removing job {} from scheduler", jobKey);
         try {
@@ -117,8 +119,9 @@ public class JobSchedulerSystemServiceImpl extends BaseSystemServiceImpl impleme
             else
                 deleteJobFromScheduler(job);
         } catch (SchedulerException e) {
-            getLog().error("Job {} has not been removed: {}", new Object[]{jobKey, e.getMessage()});
-            throw new RuntimeException(e);
+            //getLog().error("Job {} has not been removed: {}", jobKey, e.getMessage());
+            String errorMessage = String.format("Job %s has not been removed: %s", jobKey, e.getMessage());
+            throw new WaterRuntimeException(errorMessage,e);
         }
     }
 
@@ -128,7 +131,7 @@ public class JobSchedulerSystemServiceImpl extends BaseSystemServiceImpl impleme
         if (jobDetail == null) {
             String errorMsg = "Could not update job: jobDetail was null";
             getLog().error(errorMsg);
-            throw new RuntimeException(errorMsg);
+            throw new WaterRuntimeException(errorMsg);
         }
         JobKey jobKey = job.getJobKey();
         getLog().info("Updating job {} to scheduler", jobKey);
@@ -143,8 +146,9 @@ public class JobSchedulerSystemServiceImpl extends BaseSystemServiceImpl impleme
             } else
                 getLog().warn("Job does not exist, it has been neither updated nor scheduled");
         } catch (ParseException | SchedulerException e) {
-            getLog().error("Job {} has not been updated: {}", new Object[]{jobKey, e.getMessage()});
-            throw new RuntimeException(e);
+            //getLog().error("Job {} has not been updated: {}", jobKey, e.getMessage());
+            String errorMessage = String.format("Job %s has not been updated: %s", jobKey, e.getMessage());
+            throw new WaterRuntimeException(e);
         }
     }
 
@@ -216,22 +220,24 @@ public class JobSchedulerSystemServiceImpl extends BaseSystemServiceImpl impleme
         String cronExpression = job.getCronExpression();
         CronExpression.validateExpression(cronExpression);
         TriggerKey triggerKey = new TriggerKey(jobKey.getName(), jobKey.getGroup());
-        TriggerBuilder triggerBuilder;
-        Trigger oldTrigger = null;
+        TriggerBuilder<Trigger> triggerBuilder;
+
         if (scheduler.checkExists(triggerKey)) {
-            oldTrigger = scheduler.getTrigger(triggerKey);
-            triggerBuilder = oldTrigger.getTriggerBuilder();
+            @SuppressWarnings("unchecked")
+            TriggerBuilder<Trigger> existingBuilder = (TriggerBuilder<Trigger>) scheduler.getTrigger(triggerKey).getTriggerBuilder();
+            triggerBuilder = existingBuilder;
         } else {
-            triggerBuilder = newTrigger().withIdentity(triggerKey);
+            triggerBuilder = TriggerBuilder.newTrigger().withIdentity(triggerKey);
         }
+
         Trigger trigger = triggerBuilder
                 .withSchedule(cronSchedule(cronExpression).withMisfireHandlingInstructionFireAndProceed())
                 .forJob(jobKey)
                 .build();
-        if (oldTrigger == null)
-            scheduler.scheduleJob(trigger);
-        else
+        if (scheduler.checkExists(triggerKey))
             scheduler.rescheduleJob(triggerKey, trigger);
+        else
+            scheduler.scheduleJob(trigger);
     }
 
     private void deleteJobFromScheduler(WaterJob job) throws SchedulerException {

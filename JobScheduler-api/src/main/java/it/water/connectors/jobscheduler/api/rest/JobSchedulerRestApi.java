@@ -1,15 +1,10 @@
 package it.water.connectors.jobscheduler.api.rest;
 
-import it.water.connectors.jobscheduler.model.*;
-import it.water.core.api.model.PaginableResult;
+import io.swagger.annotations.Api;
 import it.water.core.api.service.rest.FrameworkRestApi;
 import it.water.core.api.service.rest.RestApi;
-import it.water.service.rest.api.security.LoggedIn;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import it.water.core.api.service.rest.WaterJsonView;
-import io.swagger.annotations.*;
-import javax.ws.rs.*;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 
 /**
